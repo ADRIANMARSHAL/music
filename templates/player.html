@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="full-player">
+  <img id="full-cover" src="/static/default_cover.png" alt="cover" class="big-cover">
+  <h2 id="full-song">Song Name</h2>
+  <h3 id="full-artist">Artist Name</h3>
+
+  <div class="controls">
+    <button onclick="prevSong()">⏮</button>
+    <button id="full-play-pause" onclick="togglePlay()">▶</button>
+    <button onclick="nextSong()">⏭</button>
+  </div>
+
+  <button onclick="closeFullPlayer()">Minimize</button>
+</div>
+{% endblock %}

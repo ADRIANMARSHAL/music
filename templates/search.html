@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Shallarr Music{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>Search Music</h2>
+
+  <!-- Search bar -->
+  <form method="GET" action="{{ url_for('search') }}" class="search-bar">
+    <input type="text" name="q" placeholder="Search for songs or artists..." value="{{ request.args.get('q', '') }}" required>
+    <button type="submit">Search</button>
+  </form>
+
+  <!-- Search Results -->
+  <div class="song-list">
+    {% if songs %}
+      {% for song in songs %}
+        <div class="song-card" onclick="playSong('{{ song.file_url }}', '{{ song.title }}', '{{ song.artist }}', '{{ song.cover_url }}')">
+          <img src="{{ song.cover_url }}" alt="{{ song.title }}">
+          <h3>{{ song.title }}</h3>
+          <p>{{ song.artist }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      {% if request.args.get('q') %}
+        <p>No results found for "{{ request.args.get('q') }}"</p>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Song{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2>Upload a New Song</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <label for="title">Song Title</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="artist">Artist</label>
+    <input type="text" id="artist" name="artist" required>
+
+    <label for="file">Audio File</label>
+    <input type="file" id="file" name="file" accept="audio/*" required>
+
+    <label for="cover">Cover Photo</label>
+    <input type="file" id="cover" name="cover" accept="image/*" required>
+
+    <button type="submit">Upload</button>
+  </form>
+</div>
+{% endblock %}

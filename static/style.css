@@ -1,0 +1,276 @@
+/* === Global Reset === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  line-height: 1.6;
+  padding-bottom: 100px; /* space for fixed bottom player */
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+/* === Navbar === */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  background: #181818;
+  border-bottom: 1px solid #333;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+nav h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1db954;
+}
+
+nav ul {
+  display: flex;
+  gap: 20px;
+}
+
+nav ul li a {
+  color: #aaa;
+  transition: color 0.2s ease;
+}
+
+nav ul li a:hover {
+  color: #1db954;
+}
+
+/* === Page Content === */
+.container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+/* === Song List === */
+.song-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.song-card {
+  background: #181818;
+  padding: 15px;
+  border-radius: 12px;
+  transition: transform 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.song-card:hover {
+  transform: translateY(-5px);
+  background: #222;
+}
+
+.song-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.song-card h3 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.song-card p {
+  font-size: 14px;
+  color: #aaa;
+}
+
+/* === Forms (Login, Signup, Upload) === */
+form {
+  background: #181818;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 400px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+form input, form button {
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+}
+
+form input {
+  background: #333;
+  color: white;
+}
+
+form button {
+  background: #1db954;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+form button:hover {
+  background: #14833b;
+}
+
+/* === Bottom Player Bar === */
+.player-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: #181818;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-top: 1px solid #333;
+  z-index: 1000;
+}
+
+.player-bar img {
+  width: 65px;
+  height: 65px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 15px;
+}
+
+.track-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.track-info #track-title {
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-info #track-artist {
+  font-size: 14px;
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+}
+
+.controls button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: color 0.2s ease;
+}
+
+.controls button:hover {
+  color: #1db954;
+}
+
+/* === Big Player Overlay === */
+.big-player {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #121212;
+  display: none; /* toggled by JS */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.big-player img {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.big-player h2 {
+  margin: 10px 0;
+}
+
+.big-player p {
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+.big-player .big-controls button {
+  font-size: 30px;
+  margin: 0 15px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.big-player .big-controls button:hover {
+  color: #1db954;
+}
+/* === Search Bar === */
+.search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #333;
+  color: white;
+}
+
+.search-bar button {
+  padding: 10px 20px;
+  background: #1db954;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.search-bar button:hover {
+  background: #14833b;
+}
