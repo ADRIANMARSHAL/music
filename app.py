@@ -114,27 +114,37 @@ def signup():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    if not session.get('user') or session['user'] != 'adrimarsh898@gmail.com':
+        flash("You must be logged in as admin to upload.")
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         title = request.form['title']
         artist = request.form['artist']
         audio_file = request.files['file']
         cover_file = request.files['cover']
 
+        if not audio_file or not cover_file:
+            flash("Both audio and cover files are required.")
+            return redirect('/upload')
+
         try:
-            # Upload audio to Supabase Storage
-            audio_path = f"audio/{audio_file.filename}"
-            supabase.storage.from_('songs').upload(audio_path, audio_file)
-            audio_url = supabase.storage.from_('songs').get_public_url(audio_path).public_url
+            # --- Upload audio ---
+            audio_path = f"audio/{secure_filename(audio_file.filename)}"
+            supabase.storage.from_("songs").upload(audio_path, audio_file)
+            audio_url = supabase.storage.from_("songs").get_public_url(audio_path).public_url
 
-            # Upload cover to Supabase Storage
-            cover_path = f"covers/{cover_file.filename}"
-            supabase.storage.from_('songs').upload(cover_path, cover_file)
-            cover_url = supabase.storage.from_('songs').get_public_url(cover_path).public_url
+            # --- Upload cover ---
+            cover_path = f"covers/{secure_filename(cover_file.filename)}"
+            supabase.storage.from_("songs").upload(cover_path, cover_file)
+            cover_url = supabase.storage.from_("songs").get_public_url(cover_path).public_url
 
-            # Save metadata + URLs in SQLite
+            # --- Save in SQLite DB ---
             conn = get_db()
-            conn.execute("INSERT INTO songs (title, artist, audio_url, cover_url) VALUES (?, ?, ?, ?)",
-                         (title, artist, audio_url, cover_url))
+            conn.execute(
+                "INSERT INTO songs (title, artist, filename, cover) VALUES (?, ?, ?, ?)",
+                (title, artist, audio_url, cover_url)
+            )
             conn.commit()
             conn.close()
 
@@ -146,6 +156,7 @@ def upload():
             return redirect('/upload')
 
     return render_template('upload.html')
+
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
