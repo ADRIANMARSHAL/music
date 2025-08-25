@@ -4,9 +4,15 @@ import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from supabase import create_client, Client
+
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
+
+SUPABASE_URL = "https://zqmotxqejqnjhtdjxbik.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxbW90eHFlanFuamh0ZGp4YmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODQ4ODIsImV4cCI6MjA3MTI2MDg4Mn0.2sYGb7X0uDAihr8xyDzHOJFEdAX-zeDa-LJ81VhYSJs"
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 UPLOAD_FOLDER = "uploads"
 COVER_FOLDER = "uploads/covers"
@@ -41,9 +47,10 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             artist TEXT NOT NULL,
-            filename TEXT NOT NULL,
-            cover TEXT
+            audio_url TEXT NOT NULL,
+            cover_url TEXT
         )
+
     """)
     conn.commit()
     conn.close()
@@ -105,38 +112,40 @@ def signup():
     return render_template("signup.html")
 
 
-@app.route("/upload", methods=["GET", "POST"])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    if "user" not in session or session["user"] != "adrimarsh898@gmail.com":
-        flash("You are not allowed to upload music.")
-        return redirect(url_for("index"))
+    if request.method == 'POST':
+        title = request.form['title']
+        artist = request.form['artist']
+        audio_file = request.files['file']
+        cover_file = request.files['cover']
 
-    if request.method == "POST":
-        title = request.form["title"]
-        artist = request.form["artist"]
-        file = request.files["file"]
-        cover = request.files["cover"]
+        try:
+            # Upload audio to Supabase Storage
+            audio_path = f"audio/{audio_file.filename}"
+            supabase.storage.from_('songs').upload(audio_path, audio_file)
+            audio_url = supabase.storage.from_('songs').get_public_url(audio_path).public_url
 
-        if file:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            file.save(filepath)
+            # Upload cover to Supabase Storage
+            cover_path = f"covers/{cover_file.filename}"
+            supabase.storage.from_('songs').upload(cover_path, cover_file)
+            cover_url = supabase.storage.from_('songs').get_public_url(cover_path).public_url
 
-            cover_filename = None
-            if cover:
-                cover_filename = secure_filename(cover.filename)
-                cover.save(os.path.join(app.config["COVER_FOLDER"], cover_filename))
-
+            # Save metadata + URLs in SQLite
             conn = get_db()
-            conn.execute("INSERT INTO songs (title, artist, filename, cover) VALUES (?, ?, ?, ?)",
-                         (title, artist, filename, cover_filename))
+            conn.execute("INSERT INTO songs (title, artist, audio_url, cover_url) VALUES (?, ?, ?, ?)",
+                         (title, artist, audio_url, cover_url))
             conn.commit()
             conn.close()
-            flash("Song uploaded successfully!")
-            return redirect(url_for("index"))
 
-    return render_template("upload.html")
+            flash('Song uploaded successfully!', 'success')
+            return redirect('/upload')
 
+        except Exception as e:
+            flash(f'Upload failed: {e}', 'danger')
+            return redirect('/upload')
+
+    return render_template('upload.html')
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):

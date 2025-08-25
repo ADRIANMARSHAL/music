@@ -11,6 +11,7 @@
         {% if session['user'] == 'adrimarsh898@gmail.com' %}
           <a href="{{ url_for('upload') }}">Upload</a>
         {% endif %}
+        <a href="{{ url_for('login') }}">Logout</a>
       {% else %}
         <a href="{{ url_for('login') }}">Login</a>
         <a href="{{ url_for('signup') }}">Sign Up</a>
@@ -19,12 +20,16 @@
   </div>
 
   <h3>Latest Songs</h3>
-  <div class="song-list">
+  <div class="song-list" style="display:flex; flex-wrap:wrap; gap:20px;">
     {% if songs %}
       {% for song in songs %}
-        <div class="song-card" 
-             onclick="playSong('{{ song.file_url }}', '{{ song.title|escape }}', '{{ song.artist|escape }}', '{{ song.cover_url }}')">
-          <img src="{{ song.cover_url }}" alt="{{ song.title }}">
+        <div class="song-card"
+             data-url="{{ song.audio_url }}"
+             data-title="{{ song.title|escape }}"
+             data-artist="{{ song.artist|escape }}"
+             data-cover="{{ song.cover_url }}"
+             style="width:200px; cursor:pointer;">
+          <img src="{{ song.cover_url }}" alt="{{ song.title }}" style="width:100%; border-radius:10px;">
           <div class="song-meta">
             <h3>{{ song.title }}</h3>
             <p>{{ song.artist }}</p>
@@ -37,4 +42,3 @@
   </div>
 </div>
 {% endblock %}
-
