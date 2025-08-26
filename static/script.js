@@ -1,121 +1,75 @@
-// ---------------- Supabase Config ----------------
-const { createClient } = supabase;
-const supabaseUrl = "https://zqmotxqejqnjhtdjxbik.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxbW90eHFlanFuamh0ZGp4YmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODQ4ODIsImV4cCI6MjA3MTI2MDg4Mn0.2sYGb7X0uDAihr8xyDzHOJFEdAX-zeDa-LJ81VhYSJs";
-const supabaseClient = createClient(supabaseUrl, supabaseKey);
+// script.js
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// ---------------- DOM Elements ----------------
-const songList = document.getElementById("song-list");
-const audioPlayer = document.getElementById("audio-player");
-const playBtn = document.getElementById("play-btn");
-const pauseBtn = document.getElementById("pause-btn");
-const coverImg = document.getElementById("cover-img");
-const nowPlaying = document.getElementById("now-playing");
+// Your Supabase credentials
+const SUPABASE_URL = "https://zqmotxqejqnjhtdjxbik.supabase.co"; 
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxbW90eHFlanFuamh0ZGp4YmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODQ4ODIsImV4cCI6MjA3MTI2MDg4Mn0.2sYGb7X0uDAihr8xyDzHOJFEdAX-zeDa-LJ81VhYSJs";
 
-// ---------------- Cache ----------------
-let songsCache = []; // Stores songs for fast reloading
-let currentSongIndex = 0;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ---------------- Fetch Songs ----------------
-async function fetchSongs() {
+async function loadSongs() {
   try {
-    // Get list of files in "songs" bucket
-    const { data, error } = await supabaseClient.storage
+    // Fetch songs list from Supabase Storage (bucket: songs)
+    const { data: files, error } = await supabase.storage
       .from("songs")
-      .list("", { limit: 50, sortBy: { column: "created_at", order: "desc" } });
+      .list("", { limit: 100 });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching songs:", error);
+      return;
+    }
 
-    // Convert to public URLs
-    songsCache = await Promise.all(
-      data.map(async (file) => {
-        const { data: urlData } = supabaseClient.storage
-          .from("songs")
-          .getPublicUrl(file.name);
+    if (!files || files.length === 0) {
+      document.getElementById("songs-list").innerHTML =
+        "<p>No songs uploaded yet.</p>";
+      return;
+    }
 
-        // Extract metadata from filename (example: title-artist-cover.jpg)
-        const parts = file.name.split("-");
-        return {
-          title: parts[0] || "Unknown Title",
-          artist: parts[1] || "Unknown Artist",
-          cover: parts[2] ? `https://YOUR-PROJECT-URL.supabase.co/storage/v1/object/public/covers/${parts[2]}` : "default-cover.jpg",
-          url: urlData.publicUrl,
-        };
-      })
-    );
+    // Clear old list
+    const songsList = document.getElementById("songs-list");
+    songsList.innerHTML = "";
 
-    renderSongs();
+    // Loop through each song
+    for (const file of files) {
+      // Generate public URL
+      const { data: urlData } = supabase.storage
+        .from("songs")
+        .getPublicUrl(file.name);
+
+      const songUrl = urlData.publicUrl;
+
+      // Fetch metadata from Supabase table (title, artist, cover)
+      const { data: meta, error: metaError } = await supabase
+        .from("songs_meta")
+        .select("*")
+        .eq("file_name", file.name)
+        .single();
+
+      if (metaError) {
+        console.warn(`No metadata for ${file.name}`);
+      }
+
+      // Create song card
+      const songCard = document.createElement("div");
+      songCard.className =
+        "song-card p-4 rounded-lg shadow-md flex items-center gap-4 bg-white mb-4";
+
+      songCard.innerHTML = `
+        <img src="${meta?.cover_url || "default-cover.jpg"}" 
+             alt="cover" class="w-16 h-16 rounded-lg object-cover">
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold">${meta?.title || file.name}</h3>
+          <p class="text-sm text-gray-600">${meta?.artist || "Unknown Artist"}</p>
+        </div>
+        <audio controls src="${songUrl}" class="h-10"></audio>
+      `;
+
+      songsList.appendChild(songCard);
+    }
   } catch (err) {
-    console.error("Fetch songs error:", err.message);
+    console.error("Unexpected error:", err);
   }
 }
 
-// ---------------- Render Songs ----------------
-function renderSongs() {
-  songList.innerHTML = "";
-  songsCache.forEach((song, index) => {
-    const li = document.createElement("li");
-    li.className = "song-item";
-
-    li.innerHTML = `
-      <img src="${song.cover}" alt="cover" class="cover lazy-img" loading="lazy"/>
-      <div>
-        <h3>${song.title}</h3>
-        <p>${song.artist}</p>
-      </div>
-    `;
-
-    li.addEventListener("click", () => playSong(index));
-    songList.appendChild(li);
-  });
-}
-
-// ---------------- Play Song ----------------
-function playSong(index) {
-  currentSongIndex = index;
-  const song = songsCache[index];
-
-  if (!song) return;
-
-  audioPlayer.src = song.url;
-  audioPlayer.play();
-
-  coverImg.src = song.cover;
-  nowPlaying.textContent = `🎶 Now Playing: ${song.title} - ${song.artist}`;
-
-  playBtn.style.display = "none";
-  pauseBtn.style.display = "inline-block";
-}
-
-// ---------------- Controls ----------------
-playBtn.addEventListener("click", () => {
-  audioPlayer.play();
-  playBtn.style.display = "none";
-  pauseBtn.style.display = "inline-block";
-});
-
-pauseBtn.addEventListener("click", () => {
-  audioPlayer.pause();
-  pauseBtn.style.display = "none";
-  playBtn.style.display = "inline-block";
-});
-
-// Auto next song
-audioPlayer.addEventListener("ended", () => {
-  currentSongIndex = (currentSongIndex + 1) % songsCache.length;
-  playSong(currentSongIndex);
-});
-
-// ---------------- Speed Optimizations ----------------
-// 1. Lazy load images (done via `loading="lazy"` + .lazy-img class)
-// 2. Prefetch next song audio
-audioPlayer.addEventListener("play", () => {
-  const nextIndex = (currentSongIndex + 1) % songsCache.length;
-  if (songsCache[nextIndex]) {
-    const prefetch = new Audio();
-    prefetch.src = songsCache[nextIndex].url;
-  }
-});
-
-// ---------------- Init ----------------
-fetchSongs();
+// Load songs on page load
+document.addEventListener("DOMContentLoaded", loadSongs);
