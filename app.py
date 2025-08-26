@@ -132,17 +132,25 @@ def upload():
             # --- Upload audio ---
             audio_path = f"audio/{secure_filename(audio_file.filename)}"
             supabase.storage.from_("songs").upload(audio_path, audio_file.read())
-            audio_url = supabase.storage.from_("songs").get_public_url(audio_path)["public_url"]
+            audio_url = supabase.storage.from_("songs").get_public_url(audio_path)
 
             # --- Upload cover ---
             cover_path = f"covers/{secure_filename(cover_file.filename)}"
             supabase.storage.from_("songs").upload(cover_path, cover_file.read())
-            cover_url = supabase.storage.from_("songs").get_public_url(cover_path)["public_url"]
-
+            cover_url = supabase.storage.from_("songs").get_public_url(cover_path)
+            
+            # Save metadata in songs table
+            supabase.table("songs").insert({
+                "title": title,
+                "artist": artist,
+                "song_url": audio_url,
+                "cover_url": cover_url
+            }).execute()
+            
             # --- Save in SQLite DB ---
             conn = get_db()
             conn.execute(
-                "INSERT INTO songs (title, artist, filename, cover) VALUES (?, ?, ?, ?)",
+                "INSERT INTO songs (title, artist, audio_url, cover_url) VALUES (?, ?, ?, ?)",
                 (title, artist, audio_url, cover_url)
             )
             conn.commit()
@@ -156,7 +164,6 @@ def upload():
             return redirect('/upload')
 
     return render_template('upload.html')
-
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):

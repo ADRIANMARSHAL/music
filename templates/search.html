@@ -16,7 +16,7 @@
   <div class="song-list">
     {% if songs %}
       {% for song in songs %}
-        <div class="song-card" onclick="playSong('{{ song.file_url }}', '{{ song.title }}', '{{ song.artist }}', '{{ song.cover_url }}')">
+        <div class="song-card" onclick="playSong('{{ song.audio_url }}', '{{ song.title }}', '{{ song.artist }}', '{{ song.cover_url }}')">
           <img src="{{ song.cover_url }}" alt="{{ song.title }}">
           <h3>{{ song.title }}</h3>
           <p>{{ song.artist }}</p>
