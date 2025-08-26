@@ -60,11 +60,13 @@ init_db()
 
 @app.route("/")
 def index():
-    conn = get_db()
-    songs = conn.execute("SELECT * FROM songs").fetchall()
-    conn.close()
-    return render_template("index.html", songs=songs)
+    songs, error = supabase.table("songs").select("*").order("id", desc=True).execute()
+    if error:
+        songs = []
+    else:
+        songs = songs.data
 
+    return render_template("index.html", songs=songs)
 
 @app.route("/search", methods=["GET"])
 def search():
@@ -146,7 +148,7 @@ def upload():
                 "song_url": audio_url,
                 "cover_url": cover_url
             }).execute()
-            
+
             # --- Save in SQLite DB ---
             conn = get_db()
             conn.execute(

@@ -21,24 +21,26 @@
 
   <h3>Latest Songs</h3>
   <div class="song-list" style="display:flex; flex-wrap:wrap; gap:20px;">
-    {% if songs %}
-      {% for song in songs %}
-        <div class="song-card"
-             data-url="{{ song.audio_url }}"
-             data-title="{{ song.title|escape }}"
-             data-artist="{{ song.artist|escape }}"
-             data-cover="{{ song.cover_url }}"
-             style="width:200px; cursor:pointer;">
-          <img src="{{ song.cover_url }}" alt="{{ song.title }}" style="width:100%; border-radius:10px;">
-          <div class="song-meta">
-            <h3>{{ song.title }}</h3>
-            <p>{{ song.artist }}</p>
-          </div>
-        </div>
-      {% endfor %}
-    {% else %}
-      <p>No songs uploaded yet.</p>
-    {% endif %}
+{% if songs %}
+  {% for song in songs %}
+    <div class="song-card"
+         data-url="{{ song.audio_url }}"
+         data-title="{{ song.title|escape }}"
+         data-artist="{{ song.artist|escape }}"
+         data-cover="{{ song.cover_url }}"
+         style="width:200px; cursor:pointer;">
+      <img src="{{ song.cover_url }}" alt="{{ song.title }}" style="width:100%; border-radius:10px;">
+      <div class="song-meta">
+        <h3>{{ song.title }}</h3>
+        <p>{{ song.artist }}</p>
+      </div>
+      <audio controls src="{{ song.audio_url }}"></audio> <!-- ✅ Added player -->
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No songs uploaded yet.</p>
+{% endif %}
+
   </div>
 </div>
 {% endblock %}

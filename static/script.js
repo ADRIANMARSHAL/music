@@ -1,75 +1,48 @@
 // script.js
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// Your Supabase credentials
-const SUPABASE_URL = "https://zqmotxqejqnjhtdjxbik.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxbW90eHFlanFuamh0ZGp4YmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODQ4ODIsImV4cCI6MjA3MTI2MDg4Mn0.2sYGb7X0uDAihr8xyDzHOJFEdAX-zeDa-LJ81VhYSJs";
+// Initialize Supabase client
+const { createClient } = window.supabase;
+const supabaseUrl = "https://zqmotxqejqnjhtdjxbik.supabase.co"; // replace
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxbW90eHFlanFuamh0ZGp4YmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODQ4ODIsImV4cCI6MjA3MTI2MDg4Mn0.2sYGb7X0uDAihr8xyDzHOJFEdAX-zeDa-LJ81VhYSJs"; // replace
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-async function loadSongs() {
+async function fetchSongs() {
   try {
-    // Fetch songs list from Supabase Storage (bucket: songs)
-    const { data: files, error } = await supabase.storage
+    // Fetch songs from the "songs" table
+    const { data, error } = await supabase
       .from("songs")
-      .list("", { limit: 100 });
+      .select("id, title, artist, cover_url, audio_url")
+      .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching songs:", error);
+    if (error) throw error;
+
+    const songList = document.getElementById("song-list");
+    songList.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      songList.innerHTML = "<p>No songs uploaded yet 🎶</p>";
       return;
     }
 
-    if (!files || files.length === 0) {
-      document.getElementById("songs-list").innerHTML =
-        "<p>No songs uploaded yet.</p>";
-      return;
-    }
+    data.forEach((song) => {
+      const card = document.createElement("div");
+      card.classList.add("song-card");
 
-    // Clear old list
-    const songsList = document.getElementById("songs-list");
-    songsList.innerHTML = "";
-
-    // Loop through each song
-    for (const file of files) {
-      // Generate public URL
-      const { data: urlData } = supabase.storage
-        .from("songs")
-        .getPublicUrl(file.name);
-
-      const songUrl = urlData.publicUrl;
-
-      // Fetch metadata from Supabase table (title, artist, cover)
-      const { data: meta, error: metaError } = await supabase
-        .from("songs_meta")
-        .select("*")
-        .eq("file_name", file.name)
-        .single();
-
-      if (metaError) {
-        console.warn(`No metadata for ${file.name}`);
-      }
-
-      // Create song card
-      const songCard = document.createElement("div");
-      songCard.className =
-        "song-card p-4 rounded-lg shadow-md flex items-center gap-4 bg-white mb-4";
-
-      songCard.innerHTML = `
-        <img src="${meta?.cover_url || "default-cover.jpg"}" 
-             alt="cover" class="w-16 h-16 rounded-lg object-cover">
-        <div class="flex-1">
-          <h3 class="text-lg font-semibold">${meta?.title || file.name}</h3>
-          <p class="text-sm text-gray-600">${meta?.artist || "Unknown Artist"}</p>
+      card.innerHTML = `
+        <img src="${song.cover_url}" alt="${song.title}" class="cover">
+        <div class="song-info">
+          <h3>${song.title}</h3>
+          <p>${song.artist}</p>
+          <audio controls src="${song.audio_url}"></audio>
         </div>
-        <audio controls src="${songUrl}" class="h-10"></audio>
       `;
 
-      songsList.appendChild(songCard);
-    }
+      songList.appendChild(card);
+    });
   } catch (err) {
-    console.error("Unexpected error:", err);
+    console.error("Error fetching songs:", err.message);
   }
 }
 
-// Load songs on page load
-document.addEventListener("DOMContentLoaded", loadSongs);
+// Run on page load
+document.addEventListener("DOMContentLoaded", fetchSongs);
