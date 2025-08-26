@@ -2,55 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shallarr Music</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body>
   <header>
-    <h1><a href="{{ url_for('index') }}">Shallarr Music</a></h1>
+    <h1>Shallarr Music</h1>
     <nav>
       <a href="{{ url_for('index') }}">Home</a>
+      <a href="{{ url_for('upload') }}">Upload</a>
       <a href="{{ url_for('search') }}">Search</a>
-      {% if session.get('user') %}
-        <a href="{{ url_for('login') }}">Login</a>
-        {% if session['user'] == 'adrimarsh898@gmail.com' %}
-          <a href="{{ url_for('upload') }}">Upload</a>
-        {% endif %}
+      {% if session.get("user") %}
+        <a href="{{ url_for('logout') }}">Logout</a>
       {% else %}
         <a href="{{ url_for('login') }}">Login</a>
         <a href="{{ url_for('signup') }}">Signup</a>
       {% endif %}
     </nav>
   </header>
-
   <main>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class="flash">
-          {% for message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
     {% block content %}{% endblock %}
   </main>
-
-  <!-- Global Persistent Music Player -->
-  <footer class="player-bar">
-    <img id="cover-art" src="" alt="Cover art" style="width:60px; height:60px; border-radius:5px;">
-    <div class="track-info">
-      <div id="track-title">No song playing</div>
-      <div id="track-artist">Unknown Artist</div>
-    </div>
-    <div class="controls">
-      <button onclick="prevSong()">⏮</button>
-      <button id="play-pause" onclick="togglePlay()">▶</button>
-      <button onclick="nextSong()">⏭</button>
-    </div>
-    <audio id="global-player"></audio>
-  </footer>
 </body>
 </html>

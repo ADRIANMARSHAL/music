@@ -1,46 +1,18 @@
 {% extends "base.html" %}
-
-{% block title %}Shallarr Music{% endblock %}
-
 {% block content %}
-<div class="container">
-  <div class="top-bar">
-    <h2>Welcome to Shallarr Music</h2>
-    <div class="auth-links">
-      {% if session.get('user') %}
-        {% if session['user'] == 'adrimarsh898@gmail.com' %}
-          <a href="{{ url_for('upload') }}">Upload</a>
-        {% endif %}
-        <a href="{{ url_for('login') }}">Logout</a>
-      {% else %}
-        <a href="{{ url_for('login') }}">Login</a>
-        <a href="{{ url_for('signup') }}">Sign Up</a>
-      {% endif %}
-    </div>
-  </div>
+<h2>Welcome {{ session.get("user") }}</h2>
 
-  <h3>Latest Songs</h3>
-  <div class="song-list" style="display:flex; flex-wrap:wrap; gap:20px;">
 {% if songs %}
-  {% for song in songs %}
-    <div class="song-card"
-         data-url="{{ song.audio_url }}"
-         data-title="{{ song.title|escape }}"
-         data-artist="{{ song.artist|escape }}"
-         data-cover="{{ song.cover_url }}"
-         style="width:200px; cursor:pointer;">
-      <img src="{{ song.cover_url }}" alt="{{ song.title }}" style="width:100%; border-radius:10px;">
-      <div class="song-meta">
-        <h3>{{ song.title }}</h3>
-        <p>{{ song.artist }}</p>
-      </div>
-      <audio controls src="{{ song.audio_url }}"></audio> <!-- ✅ Added player -->
-    </div>
-  {% endfor %}
+  <ul>
+    {% for song in songs %}
+      <li>
+        <img src="{{ song.cover_url }}" width="50">
+        {{ song.title }} by {{ song.artist }}
+        <a href="{{ url_for('player', song_id=song.id) }}">Play</a>
+      </li>
+    {% endfor %}
+  </ul>
 {% else %}
   <p>No songs uploaded yet.</p>
 {% endif %}
-
-  </div>
-</div>
 {% endblock %}

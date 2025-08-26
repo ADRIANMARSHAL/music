@@ -1,16 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="full-player">
-  <img id="full-cover" src="/static/default_cover.png" alt="cover" class="big-cover">
-  <h2 id="full-song">Song Name</h2>
-  <h3 id="full-artist">Artist Name</h3>
-
-  <div class="controls">
-    <button onclick="prevSong()">⏮</button>
-    <button id="full-play-pause" onclick="togglePlay()">▶</button>
-    <button onclick="nextSong()">⏭</button>
-  </div>
-
-  <button onclick="closeFullPlayer()">Minimize</button>
-</div>
+<h2>{{ song.title }} - {{ song.artist }}</h2>
+<img src="{{ song.cover_url }}" width="200"><br>
+<audio id="audioPlayer" controls>
+  <source src="{{ song.song_url }}" type="audio/mpeg">
+</audio>
+<button id="playBtn">Play</button>
 {% endblock %}
