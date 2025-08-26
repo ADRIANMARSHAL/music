@@ -1,7 +1,7 @@
 // ---------------- Supabase Config ----------------
 const { createClient } = supabase;
-const supabaseUrl = "https://YOUR-PROJECT-URL.supabase.co";
-const supabaseKey = "YOUR-ANON-KEY";
+const supabaseUrl = "https://zqmotxqejqnjhtdjxbik.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxbW90eHFlanFuamh0ZGp4YmlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2ODQ4ODIsImV4cCI6MjA3MTI2MDg4Mn0.2sYGb7X0uDAihr8xyDzHOJFEdAX-zeDa-LJ81VhYSJs";
 const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
 // ---------------- DOM Elements ----------------
