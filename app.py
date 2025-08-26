@@ -131,12 +131,12 @@ def upload():
         try:
             # --- Upload audio ---
             audio_path = f"audio/{secure_filename(audio_file.filename)}"
-            supabase.storage.from_("songs").upload(audio_path, audio_file)
+            supabase.storage.from_("songs").upload(audio_path, audio_file.read())
             audio_url = supabase.storage.from_("songs").get_public_url(audio_path).public_url
 
             # --- Upload cover ---
             cover_path = f"covers/{secure_filename(cover_file.filename)}"
-            supabase.storage.from_("songs").upload(cover_path, cover_file)
+            supabase.storage.from_("songs").upload(cover_path, cover_file.read())
             cover_url = supabase.storage.from_("songs").get_public_url(cover_path).public_url
 
             # --- Save in SQLite DB ---
